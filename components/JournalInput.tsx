@@ -61,5 +61,8 @@ const styles = StyleSheet.create({
     color: theme.colors.light.text,
     lineHeight: theme.typography.lineHeights.body * 1.2,
     textAlignVertical: 'top', // For Android
+    paddingTop: theme.spacing.sm, // Forces top alignment on iOS/Web
+    // @ts-ignore
+    outlineStyle: 'none', // Removes web blue border
   },
 });
