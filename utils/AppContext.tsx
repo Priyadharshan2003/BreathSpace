@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { fetchUserPatterns, getJournalHistory } from '../services/supabaseService';
-import { supabase } from '../services/supabaseService'; // actually we have it in utils/supabase, let's use the exported functions
+// Removed unused import
 
 interface AppContextType {
   journalText: string;

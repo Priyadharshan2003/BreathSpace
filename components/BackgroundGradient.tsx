@@ -10,9 +10,9 @@ interface BackgroundGradientProps {
 }
 
 export const BackgroundGradient: React.FC<BackgroundGradientProps> = ({ children, style, isDark = false }) => {
-  const colors = isDark 
+  const colors = (isDark 
     ? [theme.colors.dark.background, '#1A1B41'] // Navy to dark purple-ish fade
-    : [theme.colors.light.card, '#E6F4FE']; // White to very soft blue fade
+    : [theme.colors.light.card, '#E6F4FE']) as readonly [string, string, ...string[]];
 
   return (
     <LinearGradient

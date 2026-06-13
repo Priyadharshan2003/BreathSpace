@@ -94,7 +94,6 @@ export const HomeScreen = ({ navigation }: any) => {
             )}
           </TouchableOpacity>
         </View>
-      </View>
       </SafeAreaView>
     </BackgroundGradient>
   );
