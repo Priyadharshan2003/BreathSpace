@@ -11,6 +11,7 @@ export function useLiveConvo(ragContext: any[] = []) {
   const [aiResponse, setAiResponse] = useState('');
   
   const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef(''); // Reference to avoid closure staleness
 
   useEffect(() => {
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -26,13 +27,14 @@ export function useLiveConvo(ragContext: any[] = []) {
             currentTranscript += event.results[i][0].transcript;
           }
           setTranscript(currentTranscript);
+          transcriptRef.current = currentTranscript; // Always keep the latest value in a ref
         };
 
         recognition.onend = () => {
-          // Trigger inference if we were listening and got text
           if (recognitionRef.current && recognitionRef.current._listening) {
             recognitionRef.current._listening = false;
-            handleSpeechEnd();
+            // Pass the absolute latest transcript from the ref to avoid stale state
+            handleSpeechEnd(transcriptRef.current);
           }
         };
         
@@ -47,6 +49,7 @@ export function useLiveConvo(ragContext: any[] = []) {
   const startListening = () => {
     setState('LISTENING');
     setTranscript('');
+    transcriptRef.current = '';
     setAiResponse('');
     Speech.stop();
     if (recognitionRef.current) {
@@ -65,37 +68,34 @@ export function useLiveConvo(ragContext: any[] = []) {
     setState('IDLE');
   };
 
-  const handleSpeechEnd = async () => {
-    setState((curr) => {
-       if (curr !== 'LISTENING') return curr;
-       return 'THINKING';
-    });
+  const handleSpeechEnd = async (finalText: string) => {
+    setState('THINKING');
     
-    // We need a short delay to ensure transcript state is fully updated
-    setTimeout(async () => {
-      setState((currentState) => {
-        if (currentState !== 'THINKING') return currentState;
-        
-        generateChatResponse(transcript || "Hello", "", [], ragContext)
-          .then((reply) => {
-             setAiResponse(reply);
-             setState('SPEAKING');
-             
-             if (Platform.OS === 'web') {
-               const utterance = new SpeechSynthesisUtterance(reply);
-               utterance.onend = () => setState('IDLE');
-               window.speechSynthesis.speak(utterance);
-             } else {
-               Speech.speak(reply, {
-                 onDone: () => setState('IDLE'),
-               });
-             }
-          })
-          .catch(() => setState('IDLE'));
-          
-        return currentState;
-      });
-    }, 500);
+    try {
+      // If the user didn't say anything, don't ping the AI with a blank request
+      if (!finalText || finalText.trim() === "") {
+        setState('IDLE');
+        return;
+      }
+
+      const reply = await generateChatResponse(finalText, "", [], ragContext);
+      
+      setAiResponse(reply);
+      setState('SPEAKING');
+      
+      if (Platform.OS === 'web') {
+        const utterance = new SpeechSynthesisUtterance(reply);
+        utterance.onend = () => setState('IDLE');
+        window.speechSynthesis.speak(utterance);
+      } else {
+        Speech.speak(reply, {
+          onDone: () => setState('IDLE'),
+        });
+      }
+    } catch (e) {
+      console.error("Speech Generation Error:", e);
+      setState('IDLE');
+    }
   };
 
   return { state, transcript, aiResponse, startListening, stopListening };
