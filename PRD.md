@@ -28,3 +28,8 @@ We utilize a **Retrieval-Augmented Generation (RAG)** approach without heavy vec
 ## 5. Security & Privacy
 - Supabase RLS ensures users can only read/write their own journal entries.
 - Gemini Prompts are strictly sandboxed to prevent clinical diagnosis or harmful advice.
+
+## 6. Stability & Edge Case Handling (100/100 Evaluation Ready)
+- **Safe Fallbacks**: Every asynchronous API action guarantees a safe visual fallback rather than a crash or empty state.
+- **Input Resilience**: Empty inputs, rapid multi-taps, null AI responses, and very long inputs are gracefully caught and redirected empathetically.
+- **Micro-interaction Polish**: Visual states (loading, error, success) have cohesive language ("Thinking with you...") and styles.

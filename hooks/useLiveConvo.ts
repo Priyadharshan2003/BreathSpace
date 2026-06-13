@@ -127,7 +127,10 @@ export function useLiveConvo(ragContext: any[] = []) {
 
   const submitMessage = async (text: string) => {
     if (!text || text.trim() === '') {
-      setState('IDLE');
+      const fallbackMsg = "You can take your time… write whenever you're ready.";
+      setAiResponse(fallbackMsg);
+      setState('SPEAKING');
+      speakText(fallbackMsg, () => setState('IDLE'));
       return;
     }
     setState('THINKING');

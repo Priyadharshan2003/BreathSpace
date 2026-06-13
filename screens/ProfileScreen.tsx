@@ -4,10 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../styles/theme';
 import { supabase } from '../utils/supabase';
+import { useAppContext } from '../utils/AppContext';
 
 export const ProfileScreen = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { setIsGuest } = useAppContext();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -19,8 +22,16 @@ export const ProfileScreen = () => {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    await supabase.auth.signOut();
-    setIsSigningOut(false);
+    setError(null);
+    try {
+      await supabase.auth.signOut();
+      setIsGuest(false);
+    } catch (e) {
+      console.error(e);
+      setError("Failed to sign out. Try again.");
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   return (
@@ -36,9 +47,11 @@ export const ProfileScreen = () => {
         
         <View style={{ flex: 1 }} />
         
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} disabled={isSigningOut}>
+        {error && <Text style={styles.errorText} accessibilityRole="alert">{error}</Text>}
+
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} disabled={isSigningOut} accessible={true} accessibilityRole="button" accessibilityLabel="Sign Out">
           {isSigningOut ? (
-            <ActivityIndicator size="small" color={theme.colors.light.primary} />
+            <Text style={styles.signOutText}>Signing out...</Text>
           ) : (
             <>
               <Ionicons name="log-out-outline" size={20} color={theme.colors.light.primary} style={styles.icon} />
@@ -61,4 +74,5 @@ const styles = StyleSheet.create({
   signOutButton: { flexDirection: 'row', alignItems: 'center', borderColor: theme.colors.light.primary, borderWidth: 1, paddingHorizontal: theme.spacing.xl, paddingVertical: theme.spacing.md, borderRadius: theme.borderRadius.round, width: '100%', justifyContent: 'center', marginBottom: 100 },
   icon: { marginRight: theme.spacing.sm },
   signOutText: { color: theme.colors.light.primary, fontSize: theme.typography.sizes.body, fontWeight: '600' },
+  errorText: { color: 'red', marginBottom: theme.spacing.md, textAlign: 'center' },
 });

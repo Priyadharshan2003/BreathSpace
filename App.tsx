@@ -11,10 +11,12 @@ import { Session } from '@supabase/supabase-js';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-export default function App() {
+import { useAppContext } from './utils/AppContext';
+
+const RootContent = () => {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
-  const [isGuest, setIsGuest] = useState(false);
+  const { isGuest, setIsGuest } = useAppContext();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -27,16 +29,22 @@ export default function App() {
   }, []);
 
   return (
+    <View style={styles.container}>
+      <NavigationContainer>
+        {session || isGuest ? <AppNavigator /> : <AuthScreen onGuestLogin={() => setIsGuest(true)} />}
+      </NavigationContainer>
+      {isSplashVisible && (
+        <SplashScreen onFinish={() => setIsSplashVisible(false)} />
+      )}
+    </View>
+  );
+};
+
+export default function App() {
+  return (
     <SafeAreaProvider>
       <AppProvider>
-        <View style={styles.container}>
-          <NavigationContainer>
-            {session || isGuest ? <AppNavigator /> : <AuthScreen onGuestLogin={() => setIsGuest(true)} />}
-          </NavigationContainer>
-          {isSplashVisible && (
-            <SplashScreen onFinish={() => setIsSplashVisible(false)} />
-          )}
-        </View>
+        <RootContent />
       </AppProvider>
     </SafeAreaProvider>
   );

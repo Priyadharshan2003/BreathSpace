@@ -26,7 +26,7 @@ export const HomeScreen = ({ navigation }: any) => {
     
     // 4. Input Validation (Security Boost)
     if (!journalText || journalText.trim() === "") {
-      setError("Please write something first.");
+      setError("You can take your time… write whenever you're ready.");
       return;
     }
     
@@ -88,7 +88,7 @@ export const HomeScreen = ({ navigation }: any) => {
           <View style={{ flex: 1 }} />
           <TouchableOpacity style={styles.button} onPress={handleJournalSubmit} disabled={isLoading} accessibilityRole="button" accessibilityLabel="Reflect on journal">
             {isLoading ? (
-               <ActivityIndicator size="small" color={theme.colors.light.card} />
+               <Text style={styles.buttonText}>Thinking with you...</Text>
             ) : (
                <Text style={styles.buttonText}>Reflect</Text>
             )}

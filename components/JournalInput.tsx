@@ -44,6 +44,8 @@ export const JournalInput: React.FC<JournalInputProps> = ({
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         autoFocus
+        accessible={true}
+        accessibilityLabel={placeholder || "Journal input field"}
       />
     </View>
   );

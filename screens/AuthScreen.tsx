@@ -13,9 +13,11 @@ WebBrowser.maybeCompleteAuthSession();
 
 export const AuthScreen = ({ onGuestLogin }: { onGuestLogin?: () => void }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const redirectUrl = Linking.createURL('/');
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -32,7 +34,7 @@ export const AuthScreen = ({ onGuestLogin }: { onGuestLogin?: () => void }) => {
       }
     } catch (e) {
       console.error("Auth error: ", e);
-      alert("Failed to start Google Sign In. Ensure Google Auth is configured correctly in your Supabase Dashboard.");
+      setError("Failed to start Google Sign In. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -47,7 +49,9 @@ export const AuthScreen = ({ onGuestLogin }: { onGuestLogin?: () => void }) => {
         <Text style={styles.title}>BreathSpace</Text>
         <Text style={styles.subtitle}>Your safe space to reflect.</Text>
         
-        <TouchableOpacity style={styles.button} onPress={handleGoogleSignIn} disabled={isLoading}>
+        {error && <Text style={styles.errorText} accessibilityRole="alert">{error}</Text>}
+
+        <TouchableOpacity style={styles.button} onPress={handleGoogleSignIn} disabled={isLoading} accessible={true} accessibilityRole="button" accessibilityLabel="Continue with Google">
           {isLoading ? (
             <ActivityIndicator size="small" color={theme.colors.light.card} />
           ) : (
@@ -59,7 +63,7 @@ export const AuthScreen = ({ onGuestLogin }: { onGuestLogin?: () => void }) => {
         </TouchableOpacity>
 
         {onGuestLogin && (
-          <TouchableOpacity style={[styles.button, styles.guestButton]} onPress={onGuestLogin} disabled={isLoading}>
+          <TouchableOpacity style={[styles.button, styles.guestButton]} onPress={onGuestLogin} disabled={isLoading} accessible={true} accessibilityRole="button" accessibilityLabel="Continue as Guest">
             <User size={20} color={theme.colors.light.primary} strokeWidth={1.5} style={styles.icon} />
             <Text style={styles.guestButtonText}>Continue as Guest</Text>
           </TouchableOpacity>
@@ -81,4 +85,5 @@ const styles = StyleSheet.create({
   buttonText: { color: theme.colors.light.card, fontSize: theme.typography.sizes.body, fontWeight: '600' },
   guestButton: { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.light.primary, marginTop: theme.spacing.md },
   guestButtonText: { color: theme.colors.light.primary, fontSize: theme.typography.sizes.body, fontWeight: '600' },
+  errorText: { color: 'red', marginBottom: theme.spacing.md, textAlign: 'center' },
 });

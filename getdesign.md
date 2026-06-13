@@ -35,3 +35,8 @@ The central visual element of the Live Screen is the glowing Orb. It represents 
 - No sudden UI jumps. Ensure the text flows into the screen smoothly.
 - The mode switch buttons ("Talk instead", "Write instead") should remain subtle at the bottom of the screen to avoid distracting from the core conversation.
 - Camera overlays must use a heavy dark tint (`rgba(0,0,0,0.6)`) so the live video feed doesn't overpower the text or the calm aesthetic.
+
+## 3. UI Consistency & Frictionless UX
+- **Empty States**: Never display a blank screen or a generic "Error". Always fall back to an empathetic message ("You can take your time…").
+- **Visual Feedback**: Buttons and interactive elements immediately display soft feedback (e.g. "Thinking with you...") when an async operation starts.
+- **Unified Sizing**: All typography adheres to a strict >=16px minimum for body and small text to maintain accessibility and readability under stress.

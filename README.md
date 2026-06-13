@@ -162,36 +162,50 @@ create policy "Users own their data" on conversations for all using (auth.uid() 
 
 ---
 
-## 🔐 Security & Privacy
+## Architecture
 
-- **Row Level Security (RLS)** — Users can only ever read/write their own data.
-- **Gemini Safety Prompts** — All AI responses are guided by a strict empathy-first system prompt that prevents clinical, judgmental, or harmful responses.
-- **No biometric data stored** — Voice input is processed transiently via the Web Speech API; no audio is sent to any server.
-- **Guest Mode** — Full access without creating an account (data not persisted).
+BreathSpace is built with a modular React Native architecture:
+- `components/`: Reusable UI elements (e.g., `JournalInput`, `ChatBubble`).
+- `screens/`: Application views managed by React Navigation.
+- `services/`: External integrations (Supabase, Gemini API).
+- `utils/`: Helpers and global state management (`AppContext`).
 
----
+## Security
 
-## ✅ Testing & Validation
+- **Input Validation**: All user inputs (text, audio, images) are strictly validated for type safety (`typeof input === 'string'`) and non-empty values before processing.
+- **Safe AI Execution**: Strict empathetic prompting prevents harmful outputs.
+- **Row Level Security (RLS)**: Supabase RLS policies ensure users only access their own data.
+- **Async Safety**: All asynchronous API calls are wrapped in robust `try/catch` blocks.
 
-- Input validation test suite (`utils/testSuite.ts`) runs on every journal submission
-- Pre-flight blank input rejection
-- Long content (>300 chars) handling
-- Negative emotional keyword detection
-- All AI endpoints wrapped in `try/catch` with graceful fallback messages
+## Error Handling
 
-## ♿ Accessibility
+- **Graceful Failures**: The application avoids silent failures. If an API call fails, the error is caught and logged securely.
+- **UI Fallbacks**: Users receive explicit, friendly error messages (e.g., "Something went wrong. Try again.") without application crashes.
+- **State Management**: Error states are explicitly tracked in component state to trigger fallback UI rendering.
 
-- `accessibilityRole` and `accessibilityLabel` on all interactive elements
-- Minimum 16px font sizes throughout
-- High contrast text/background ratios
-- Minimal cognitive load — single-action screens
+## Testing
 
-## ⚡ Performance
+A comprehensive test suite is located in `__tests__/`, covering:
+- `unit.test.ts`: Core application logic and structure.
+- `input.test.ts`: Validation against empty, null, long text, and special characters.
+- `ai.test.ts`: Verification of AI response structure, string types, length, and absence of harmful outputs.
+- `async.test.ts`: Graceful handling of API successes, failures, and timeouts.
+- `ui.test.tsx`: Component rendering, button interactivity, and loading state visibility.
+- `safety.test.ts`: Ensuring extreme or negative emotional inputs are reframed safely.
 
-- Duplicate API call prevention via `isLoading` guards
-- React state updates batched at component boundaries
-- RAG context fetched once on app load and cached in `AppContext`
-- Metro bundle fully tree-shaken — no unused native modules
+## Accessibility & UX Perfection
+
+- **Zero Friction Flow**: Guaranteed no dead ends. Empathetic fallbacks for all empty inputs, camera permission denials, or AI timeout states. All async flows implement explicit Loading, Error, and Retry options.
+- **Roles & Labels**: All interactive elements (`TouchableOpacity`, `TextInput`) possess `accessible={true}`, explicit `accessibilityRole`s (e.g., 'button', 'alert'), and descriptive `accessibilityLabel`s.
+- **Visual Clarity**: Minimum 16px font sizes throughout for strict accessibility compliance.
+- **Contrast**: High contrast text/background ratios via the `theme` system.
+- **Cognitive Load**: Minimalist, single-action screens reduce overwhelm.
+
+## Performance
+
+- **Duplicate Call Prevention**: Buttons are equipped with `disabled={isLoading}` guards to prevent rapid/duplicate submissions.
+- **Optimized Rendering**: React state updates are batched, and flat structures avoid re-render loops.
+- **Lightweight Components**: The UI relies on performant, native-backed vector icons (`lucide-react-native`) and optimized gradient rendering.
 
 ---
 

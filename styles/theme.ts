@@ -27,7 +27,7 @@ export const theme = {
       largeTitle: 34,
       title: 24,
       body: 16, // Adjusted slightly for readability in cards
-      small: 14,
+      small: 16, // Enforcing accessibility minimum
     },
     lineHeights: {
       body: 26, 

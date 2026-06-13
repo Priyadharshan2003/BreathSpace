@@ -15,20 +15,26 @@ export const CompanionScreen = ({ navigation }: any) => {
   const { chatHistory, setChatHistory, pastPatterns, ragContext } = useAppContext();
   const [chatInput, setChatInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChatSubmit = async () => {
-    if (!chatInput.trim()) return;
+    if (!chatInput || chatInput.trim() === "") {
+      setError("You can take your time… write whenever you're ready.");
+      return;
+    }
     const newHistory = [...chatHistory, { text: chatInput, isAI: false }];
     setChatHistory(newHistory);
     setChatInput('');
     setIsLoading(true);
     
     try {
+      setError(null);
       const context = chatHistory.map(m => `${m.isAI ? 'AI' : 'User'}: ${m.text}`).join('\n');
       const response = await generateChatResponse(chatInput, context, pastPatterns, ragContext);
       setChatHistory([...newHistory, { text: response, isAI: true }]);
     } catch (e) {
-      setChatHistory([...newHistory, { text: "I'm here for you.", isAI: true }]);
+      console.error(e);
+      setError("Something went wrong. Try again.");
     } finally {
       setIsLoading(false);
     }
@@ -42,16 +48,23 @@ export const CompanionScreen = ({ navigation }: any) => {
       quality: 0.5,
     });
 
-    if (!result.canceled && result.assets[0].base64) {
+    if (result.canceled) {
+      setError("It's okay, you can share a photo whenever you're ready.");
+      return;
+    }
+
+    if (result.assets && result.assets[0] && result.assets[0].base64) {
       setIsLoading(true);
       const newHistory = [...chatHistory, { text: "[Sent an Image]", isAI: false }];
       setChatHistory(newHistory);
 
       try {
+        setError(null);
         const response = await analyzeImageEntry(result.assets[0].base64, result.assets[0].mimeType || 'image/jpeg');
         setChatHistory([...newHistory, { text: response, isAI: true }]);
       } catch (e) {
-        setChatHistory([...newHistory, { text: "I see what you shared.", isAI: true }]);
+        console.error(e);
+        setError("Something went wrong with the image. Try again.");
       } finally {
         setIsLoading(false);
       }
@@ -74,6 +87,11 @@ export const CompanionScreen = ({ navigation }: any) => {
             ))
           )}
         </ScrollView>
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText} accessibilityRole="alert">{error}</Text>
+          </View>
+        )}
         <View style={styles.inputRow}>
           <JournalInput value={chatInput} onChangeText={setChatInput} placeholder="Type softly..." />
         </View>
@@ -90,7 +108,7 @@ export const CompanionScreen = ({ navigation }: any) => {
           <View style={{ flex: 1 }} />
           <TouchableOpacity style={styles.button} onPress={handleChatSubmit} disabled={isLoading} accessibilityRole="button" accessibilityLabel="Send message">
             {isLoading ? (
-               <ActivityIndicator size="small" color={theme.colors.light.card} />
+               <Text style={styles.buttonText}>Thinking with you...</Text>
             ) : (
                <Text style={styles.buttonText}>Send</Text>
             )}
@@ -114,4 +132,6 @@ const styles = StyleSheet.create({
   iconButton: { padding: theme.spacing.sm, marginRight: theme.spacing.sm },
   button: { backgroundColor: theme.colors.light.text, paddingHorizontal: theme.spacing.xl, paddingVertical: theme.spacing.md, borderRadius: theme.borderRadius.round },
   buttonText: { color: theme.colors.light.card, fontSize: theme.typography.sizes.body, fontWeight: '500' },
+  errorContainer: { padding: theme.spacing.sm, backgroundColor: 'rgba(255, 0, 0, 0.1)', borderRadius: theme.borderRadius.md, marginBottom: theme.spacing.sm },
+  errorText: { color: 'red', textAlign: 'center', fontSize: theme.typography.sizes.body },
 });
