@@ -94,7 +94,7 @@ export const CompanionScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.light.background },
-  full: { flex: 1, padding: theme.spacing.lg },
+  full: { flex: 1, padding: theme.spacing.lg, paddingBottom: 110 },
   chatContainer: { flex: 1, marginBottom: theme.spacing.md },
   inputRow: { height: 100 },
   emptyText: { fontSize: theme.typography.sizes.body, color: theme.colors.light.textSecondary, textAlign: 'center', marginTop: theme.spacing.xl },

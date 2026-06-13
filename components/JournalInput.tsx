@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TextInput, StyleSheet, View } from 'react-native';
 import { theme } from '../styles/theme';
 
@@ -6,19 +6,39 @@ interface JournalInputProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  suggestions?: string[];
 }
+
+const DEFAULT_SUGGESTIONS = [
+  "I'm feeling overwhelmed by my mock tests...",
+  "My chest feels tight when I open my books...",
+  "I couldn't focus at all today...",
+  "I feel like I'm falling behind...",
+  "I'm worried about my parents' expectations..."
+];
 
 export const JournalInput: React.FC<JournalInputProps> = ({ 
   value, 
   onChangeText, 
-  placeholder = "Write anything on your mind..." 
+  placeholder,
+  suggestions = DEFAULT_SUGGESTIONS
 }) => {
+  const [currentIdx, setCurrentIdx] = useState(0);
+
+  useEffect(() => {
+    if (placeholder) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % suggestions.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [placeholder, suggestions.length]);
+
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
         multiline
-        placeholder={placeholder}
+        placeholder={placeholder || `Try: "${suggestions[currentIdx]}"`}
         placeholderTextColor={theme.colors.light.textSecondary}
         value={value}
         onChangeText={onChangeText}

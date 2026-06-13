@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.light.background },
   header: { padding: theme.spacing.xl, alignItems: 'center' },
   greetingText: { fontSize: theme.typography.sizes.title, color: theme.colors.light.text, textAlign: 'center', lineHeight: 34 },
-  full: { flex: 1, padding: theme.spacing.lg },
+  full: { flex: 1, padding: theme.spacing.lg, paddingBottom: 110 },
   actionRow: { flexDirection: 'row', alignItems: 'center', marginTop: theme.spacing.md },
   iconButton: { padding: theme.spacing.sm, marginRight: theme.spacing.sm },
   button: { backgroundColor: theme.colors.light.text, paddingHorizontal: theme.spacing.xl, paddingVertical: theme.spacing.md, borderRadius: theme.borderRadius.round },
