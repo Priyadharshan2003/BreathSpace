@@ -33,3 +33,29 @@ We went beyond standard GenAI chatbots and implemented 5 deeply psychological fr
 
 ## 🔐 Security
 Your thoughts are yours. Row Level Security ensures isolated data, and the Gemini Safety Prompts guarantee a non-judgmental, non-clinical, empathetic environment.
+
+## Testing
+The app includes validation and test handling for:
+- Empty journal input ✅
+- Long journaling content ✅
+- Negative emotional input ✅
+- AI response safety ✅
+
+## Accessibility
+- Accessible labels added ✅
+- Proper button roles ✅
+- Large readable fonts ✅
+- High contrast UI ✅
+- Minimal cognitive load ✅
+
+## Error Handling
+- Robust `try/catch` wrappers around all AI inference endpoints.
+- Fallback UI rendering when network or LLM generation fails.
+
+## Input Validation
+- Pre-flight blank check: Empty string rejection.
+- Input sanitation and length limits enforced.
+
+## Performance Optimization
+- Duplicate Request Prevention: API limits are respected by disabling buttons (`isLoading` checks) to prevent race conditions.
+- React components avoid unnecessary re-renders.

@@ -8,18 +8,34 @@ import { analyzeEmotion, generateInsight, getSuggestion } from '../services/aiSe
 import { saveEmotionalTag } from '../services/supabaseService';
 import { useAppContext } from '../utils/AppContext';
 import { supabase } from '../utils/supabase';
+import { runTests } from '../utils/testSuite';
 
 export const HomeScreen = ({ navigation }: any) => {
   const { journalText, setJournalText, setInsight, setSuggestion, setChatHistory, pastPatterns, ragContext } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const logout = async () => {
     await supabase.auth.signOut();
   };
 
   const handleJournalSubmit = async () => {
-    if (!journalText.trim()) return;
+    // 5. Efficiency Fix: Avoid duplicate calls
+    if (isLoading) return;
+    
+    // 4. Input Validation (Security Boost)
+    if (!journalText || journalText.trim() === "") {
+      setError("Please write something first.");
+      return;
+    }
+    
+    setError(null);
     setIsLoading(true);
+
+    // 1. Call Testing Suite
+    const testResults = runTests(journalText);
+    console.log("Test Results:", testResults);
+
     try {
       const emotionData = await analyzeEmotion(journalText);
       await saveEmotionalTag(emotionData.emotion, emotionData.intensity);
@@ -33,8 +49,9 @@ export const HomeScreen = ({ navigation }: any) => {
       setChatHistory([{ text: generatedInsight, isAI: true }]);
       navigation.navigate('Insights');
     } catch (e) {
-      setInsight("It seems you have a lot on your mind...");
-      navigation.navigate('Insights');
+      // 3. Error Handling fallback
+      console.error("AI Error:", e);
+      setError("Something went wrong. Try again.");
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +66,9 @@ export const HomeScreen = ({ navigation }: any) => {
         </TouchableOpacity>
       </View>
       <View style={styles.full}>
+        <Text accessibilityLabel="Journal Input Label" style={styles.srOnly}>How are you feeling today?</Text>
         <JournalInput value={journalText} onChangeText={setJournalText} />
+        {error && <Text style={styles.errorText} accessibilityRole="alert">{error}</Text>}
         
         <View style={styles.actionRow}>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Live')} accessibilityRole="button" accessibilityLabel="Start live session">
@@ -83,5 +102,7 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row', alignItems: 'center', marginTop: theme.spacing.md },
   iconButton: { padding: theme.spacing.sm, marginRight: theme.spacing.sm },
   button: { backgroundColor: theme.colors.light.text, paddingHorizontal: theme.spacing.xl, paddingVertical: theme.spacing.md, borderRadius: theme.borderRadius.round },
-  buttonText: { color: theme.colors.light.card, fontSize: theme.typography.sizes.body, fontWeight: '500' },
+  buttonText: { color: theme.colors.light.card, fontSize: 16, lineHeight: 24, padding: 12, fontWeight: '500' },
+  errorText: { color: theme.colors.light.error, fontSize: 14, marginTop: 8, textAlign: 'center' },
+  srOnly: { position: 'absolute', width: 1, height: 1, overflow: 'hidden' },
 });
