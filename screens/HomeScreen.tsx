@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../styles/theme';
 import { JournalInput } from '../components/JournalInput';
@@ -8,7 +9,7 @@ import { saveEmotionalTag } from '../services/supabaseService';
 import { useAppContext } from '../utils/AppContext';
 
 export const HomeScreen = ({ navigation }: any) => {
-  const { journalText, setJournalText, setInsight, setSuggestion, setChatHistory, pastPatterns } = useAppContext();
+  const { journalText, setJournalText, setInsight, setSuggestion, setChatHistory, pastPatterns, ragContext } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleJournalSubmit = async () => {
@@ -18,7 +19,7 @@ export const HomeScreen = ({ navigation }: any) => {
       const emotionData = await analyzeEmotion(journalText);
       await saveEmotionalTag(emotionData.emotion, emotionData.intensity);
 
-      const generatedInsight = await generateInsight(journalText, pastPatterns);
+      const generatedInsight = await generateInsight(journalText, pastPatterns, ragContext);
       setInsight(generatedInsight);
       
       const generatedSuggestion = await getSuggestion(`User felt ${emotionData?.emotion || 'overwhelmed'} after: ${journalText}`);

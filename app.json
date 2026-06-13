@@ -2,15 +2,11 @@
   "expo": {
     "name": "BreathSpace",
     "slug": "breathspace",
+    "scheme": "breathspace",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FAFAFA"
-    },
     "ios": {
       "supportsTablet": true
     },
@@ -27,7 +23,17 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-splash-screen"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo.jpg",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FAFAFA"
+        }
+      ],
+      "expo-font",
+      "expo-web-browser"
     ]
   }
 }

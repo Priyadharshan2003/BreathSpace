@@ -1,115 +1,29 @@
-# getdesign.md - BreathSpace AI Design System & Specification
+# DESIGN.md: The BreathSpace Aesthetic
 
-## 1. 🌿 DESIGN PHILOSOPHY
+## Philosophy: "Calm First, Data Second"
+BreathSpace is NOT a dashboard. Dashboards induce stress. BreathSpace is a **sanctuary**.
+The UI must feel like a quiet room. Every interaction, animation, and color choice must reduce the user's cognitive load.
 
-**Calm-first interaction design**
-The app prioritizes a tranquil experience, reducing noise and focusing on the user's immediate emotional state.
+## 🎨 Color System (The "Forest Dawn" Palette)
+We completely avoid medical blues or aggressive reds.
+- **Background (`#F9FAFB`)**: Soft, warm off-white. Never pure stark white.
+- **Surface (`#FFFFFF`)**: Pure white for elevated cards to create gentle depth.
+- **Primary Accent (`#059669`)**: Deep, calming emerald green. Used sparingly for active states and primary actions.
+- **Text Primary (`#1F2937`)**: Charcoal grey for ultimate readability without the harsh contrast of pure black.
+- **Text Secondary (`#6B7280`)**: Soft slate grey for metadata and timestamps.
+- **Danger/Warning (`#EF4444`)**: Used ONLY for destructive actions (like deleting an account), never for emotional states.
 
-**Emotional safety principles**
-We create a space where users feel understood, without judgment, clinical evaluation, or harsh insights. The Safety Agent ensures no extreme advice is ever given.
+## ✍️ Typography
+- **Primary Font**: System sans-serif (Inter/SF Pro/Roboto) optimized for legibility.
+- **Headings**: Semi-bold, large spacing to feel airy.
+- **Body Text**: 16px minimum, 1.5x line height to ensure text feels breathable.
 
-**Low cognitive load experience**
-Interactions require minimal thought or effort. No metrics, no dashboards, no complex UI.
+## 🌊 Motion & Micro-interactions
+- **Breathing Logo**: The splash screen features a pulsing, gentle Lottie animation that mimics a 4-7-8 breathing technique.
+- **Shadows**: We use extreme diffusion (`shadowOpacity: 0.05`, `shadowRadius: 15`) so cards don't look like rigid boxes, but rather soft floating paper.
 
-## 2. 🎨 DESIGN TOKENS
-
-### Colors
-- **Light theme (primary calm palette):** Soft white background, light green/blue accents, dark gray text.
-- **Dark theme (low strain):** Deep navy background, soft white text.
-
-### Typography
-- **Font family:** Inter / System UI
-- **Font sizes:** Large, readable defaults.
-- **Line spacing:** Breathable (e.g., 1.5 to 1.6).
-
-### Spacing
-- **Padding system:** Generous padding.
-- **Margin rules:** Clear separation.
-
-## 3. 🧩 COMPONENT LIBRARY
-
-- **CalmCard:** Gently displays AI reflections. Soft rounded corners, subtle shadows, pastel backgrounds.
-- **JournalInput:** Safe space for freeform expression. Borderless large text area, minimal UI chrome.
-- **ChatBubble:** Conversational support interface. Soft, non-rigid shapes.
-- **SuggestionBlock:** Offers ONE simple, gentle idea. Distinct but calm styling.
-- **ClosureMessage:** Soft end to the session. Centered, dominant but calming.
-
-## 4. 🌬️ MICRO-INTERACTIONS
-
-- **Breathing animation:** Slow, rhythmic expansion and contraction on the splash screen.
-- **Soft fade transitions:** No harsh cuts between screens.
-- **Button press feedback:** Gentle scale down and soft color shift.
-
-## 5. 🧠 CONTENT & COPY GUIDELINES
-
-**DO Use:** Gentle tone, empathetic language, short sentences.
-**DO NOT Use:** Commands, instruction overload, clinical terms, guilt language.
-
-*Example transformation (Insight Generation Agent):*
-- ❌ “You are stressed level 8”
-- ✅ “It feels like things have been heavy lately…”
-
-## 6. 📱 SCREEN RULES & EMOTION-FIRST FLOW
-
-- **Splash:** Instant calm entry. "Take a breath."
-- **Entry:** Emotional grounding. “I’m here.”
-- **Journal:** Free writing without limits.
-- **Insight (AI Reflection):** “What I notice.”
-- **Chat:** Real-time conversational AI companion.
-- **Night Closure:** “You did enough today. Rest.”
-
-## 7. ⚖️ UX DECISION PRINCIPLES
-
-For every feature added, validate:
-👉 **“Does this reduce stress?”**
-If not: remove OR simplify.
-
-## 8. ♿ ACCESSIBILITY DESIGN
-
-- **Minimum font size:** Large defaults.
-- **Contrast ratios:** High contrast but soft colors.
-- **Readability rules:** No dense paragraphs.
-- **Touch target sizes:** Large, easily tappable areas.
-
-## 9. 🌙 THEMING SYSTEM
-
-- **Light theme:** Default.
-- **Dark mode:** Optional toggle.
-
-## 10. CONSISTENCY RULE
-
-All UI, AI responses, and interactions must feel:
-✅ Calm
-✅ Human
-✅ Supportive
-
-Never:
-❌ mechanical
-❌ overwhelming
-
-## 11. BRANDING & LOGO SYSTEM
-**Logo Feel:** Calm, Soft, Minimal, Premium.
-**Concept:** A soft circular shape representing a breathing effect, with a subtle gradient from light green to light blue, containing a minimal icon of air/ripple.
-**Variants:** Light mode (soft white bg), Dark mode (deep navy bg).
-
-## 12. NAVIGATION SYSTEM (BOTTOM NAVBAR)
-**Structure:**
-- 🌿 Home (Journal + Entry)
-- 🧠 Insights (AI Reflection + Patterns)
-- 💬 Companion (Chat AI)
-- 🌙 Reflect (Closure)
-
-**Rules:**
-- Minimal icons (outline style like Ionicons/Feather).
-- No cluttered labels.
-- Highlight active tab softly with primary accent color.
-- Floating container with soft shadow and rounded corners.
-
-## 13. ADVANCED COMPANION FEATURES
-**Somatic Detection:** AI detects physical symptoms ("heavy chest", "headaches") and links them to emotional states gently without medicalizing.
-**Context Awareness:** Deep understanding of Indian student stressors (JEE, NEET, UPSC, family expectations).
-**Adaptive Response:** Tone, length, and interventions adapt based on emotional intensity. High stress = high empathy, low advice. Low stress = gentle suggestions.
-**Multi-Modal UX:** Optional camera and mic inputs placed subtly without cluttering the screen.
-
----
-*Documentation Rule: Whenever UI/UX or AI agent behavior is updated, update this design.md. Ensure PRD and README stay aligned with it.*
+## 🧠 The "Psychological UX"
+The UI is inextricably linked to the AI's psychological framework:
+1. **Empty States are Safe States**: When the user has no history, we don't say "No data found." We say "I'm here when you're ready to talk."
+2. **Hidden Intelligence**: We do not show the user "Stress Score: 85%". Instead, the AI implicitly uses that 85% to trigger the **Recovery Mode** logic in the background, surfacing as a gentle morning greeting.
+3. **The Confidence Mirror UI**: Insights are presented in a single, beautiful "Calm Card" rather than a list of bullet points.

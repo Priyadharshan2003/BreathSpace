@@ -6,6 +6,7 @@ export const theme = {
       text: '#4B5563', // Softer dark gray
       textSecondary: '#9CA3AF',
       accent: '#D1FAE5', // Calmer light green
+      primary: '#059669', // Deep emerald for high visibility
       border: '#E2E8F0',
     },
     dark: {

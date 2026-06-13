@@ -6,7 +6,7 @@ import { theme } from '../styles/theme';
 import { HomeScreen } from '../screens/HomeScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
 import { CompanionScreen } from '../screens/CompanionScreen';
-import { ReflectScreen } from '../screens/ReflectScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,20 +24,20 @@ export const AppNavigator = () => {
             iconName = 'bulb-outline';
           } else if (route.name === 'Companion') {
             iconName = 'chatbubble-outline';
-          } else if (route.name === 'Reflect') {
-            iconName = 'moon-outline';
+          } else if (route.name === 'Profile') {
+            iconName = 'person-outline';
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: theme.colors.light.accent,
+        tabBarActiveTintColor: theme.colors.light.primary,
         tabBarInactiveTintColor: theme.colors.light.textSecondary,
         tabBarStyle: {
           position: 'absolute',
           bottom: theme.spacing.lg,
           left: theme.spacing.lg,
           right: theme.spacing.lg,
-          elevation: 0,
+          elevation: 10,
           backgroundColor: theme.colors.light.card,
           borderRadius: theme.borderRadius.lg,
           height: 70,
@@ -45,7 +45,7 @@ export const AppNavigator = () => {
           paddingTop: theme.spacing.sm,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.05,
+          shadowOpacity: 0.15,
           shadowRadius: 20,
           borderTopWidth: 0,
         },
@@ -58,7 +58,7 @@ export const AppNavigator = () => {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Insights" component={InsightsScreen} />
       <Tab.Screen name="Companion" component={CompanionScreen} />
-      <Tab.Screen name="Reflect" component={ReflectScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 };

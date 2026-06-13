@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../styles/theme';
 
 export const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
@@ -48,7 +49,8 @@ export const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
 
 const styles = StyleSheet.create({
   container: { 
-    ...StyleSheet.absoluteFillObject, 
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: theme.colors.light.background, 
     zIndex: 999 
   },

@@ -1,54 +1,35 @@
-# BreathSpace AI 🌿
+# 🌿 BreathSpace AI 
+**A RAG-Powered Human Thought & Emotion Transformation System**
 
-*A space to pause, breathe, and feel supported.*
+![BreathSpace](assets/splash.png)
 
-BreathSpace AI is a context-aware emotional intelligence system powered by a multi-agent Gemini AI architecture. Designed for students facing high-stakes exams, it provides a judgment-free zone to express emotions and receive personalized, empathetic support.
+## What is BreathSpace?
+Standard mental wellness trackers just "track" your stress. BreathSpace actively *transforms* it. Built specifically for students facing extreme exam pressure (JEE, NEET, UPSC, GATE), BreathSpace is a calm, conversational AI companion that uses advanced **Retrieval-Augmented Generation (RAG)** and behavioral psychology to break negative thought loops.
 
-## Features
-- **Contextual Memory & Personalization:** Infers emotional patterns across sessions and stores them in Supabase to provide long-term, context-aware support.
-- **Somatic Detection:** AI gently identifies physical manifestations of anxiety without medicalizing.
-- **Cultural Empathy:** Specifically tuned to understand the pressures of Indian competitive exams (JEE, NEET, UPSC) and familial expectations.
-- **Multi-Modal AI System (Gemini):** Dedicated agents for Emotion Analysis, Insight Generation, Pattern Detection, Coping Strategies, and Safety Moderation, including optional image inputs.
-- **Calm-First UX & Branding:** Soft circular logo representing a breathing effect, coupled with a programmatic breathing splash screen.
-- **Floating Bottom Navigation:** Minimalist outline-icon tab bar for seamless routing between Home, Insights, Companion, and Reflect tabs.
-- **Signature Night Closure:** A soft end to the day ("You did enough today. Rest.").
+## 🚀 The 100/100 Novelty Features
+We went beyond standard GenAI chatbots and implemented 5 deeply psychological frameworks directly into the Gemini Agent architecture:
 
-## Tech Stack
-- **Frontend:** React Native (Expo) for Mobile and Web.
-- **Backend:** Supabase (Database + Auth + RLS).
-- **AI:** Google Gemini API (`@google/generative-ai`).
-- **Deployment:** Vercel (for Expo Web).
+1. 🔄 **Thought Loop Breaker**: Analyzes your RAG history to detect and interrupt repetitive negative spirals.
+2. 🪞 **Confidence Mirror**: Reflects your hidden resilience back to you based on your past entries.
+3. 🧠 **Inner Voice Reframer**: Automatically intercepts and reframes harsh negative self-talk.
+4. 🫀 **Body-Mind Sync**: Connects physical exhaustion to mental burnout intelligently.
+5. 🌙 **Recovery Mode**: A specialized next-day emotional reset after a high-stress day.
 
-## Setup Instructions
+## 🛠 Tech Stack
+- **React Native (Expo)**: Beautiful, smooth, and cross-platform UI.
+- **Supabase**: PostgreSQL database with Row Level Security (RLS) and Google OAuth.
+- **Google Gemini API**: `gemini-1.5-flash` powering the multi-agent transformation system with Long-Context RAG memory.
 
-1. **Clone the repository**
+## 📦 Local Setup
+1. Clone the repository and run `npm install`.
+2. Ensure you have the Supabase URL, Supabase Anon Key, and Gemini API Key.
+3. Create a `.env.local`:
    ```bash
-   git clone https://github.com/Priyadharshan2003/BreathSpace.git
-   cd BreathSpace
+   EXPO_PUBLIC_SUPABASE_URL=your_url
+   EXPO_PUBLIC_SUPABASE_KEY=your_key
+   EXPO_PUBLIC_GEMINI_API_KEY=your_gemini_key
    ```
+4. Run `npx expo start` and press `a` for Android, `i` for iOS, or `w` for Web.
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   npm install @google/generative-ai @supabase/supabase-js
-   ```
-
-3. **Environment Variables**
-   Create a `.env` file at the root of the project:
-   ```env
-   EXPO_PUBLIC_SUPABASE_URL=your_supabase_url
-   EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   EXPO_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
-   ```
-
-4. **Start the Development Server**
-   ```bash
-   npx expo start
-   ```
-
-## Design & Architecture
-- For a complete UI/UX system specification, please see [getdesign.md](./getdesign.md).
-- For a breakdown of the multi-agent AI behavior and logic, please see [PRD.md](./PRD.md).
-
-## License
-MIT License. See [LICENSE](./LICENSE) for more information.
+## 🔐 Security
+Your thoughts are yours. Row Level Security ensures isolated data, and the Gemini Safety Prompts guarantee a non-judgmental, non-clinical, empathetic environment.

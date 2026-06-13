@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { theme } from '../styles/theme';
@@ -9,7 +10,7 @@ import { generateChatResponse, analyzeImageEntry } from '../services/aiService';
 import { useAppContext } from '../utils/AppContext';
 
 export const CompanionScreen = () => {
-  const { chatHistory, setChatHistory, pastPatterns } = useAppContext();
+  const { chatHistory, setChatHistory, pastPatterns, ragContext } = useAppContext();
   const [chatInput, setChatInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -22,7 +23,7 @@ export const CompanionScreen = () => {
     
     try {
       const context = chatHistory.map(m => `${m.isAI ? 'AI' : 'User'}: ${m.text}`).join('\n');
-      const response = await generateChatResponse(chatInput, context, pastPatterns);
+      const response = await generateChatResponse(chatInput, context, pastPatterns, ragContext);
       setChatHistory([...newHistory, { text: response, isAI: true }]);
     } catch (e) {
       setChatHistory([...newHistory, { text: "I'm here for you.", isAI: true }]);

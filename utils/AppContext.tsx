@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
-import { fetchUserPatterns } from '../services/supabaseService';
+import { fetchUserPatterns, getJournalHistory } from '../services/supabaseService';
+import { supabase } from '../services/supabaseService'; // actually we have it in utils/supabase, let's use the exported functions
 
 interface AppContextType {
   journalText: string;
@@ -12,6 +13,10 @@ interface AppContextType {
   setChatHistory: (history: { text: string; isAI: boolean }[]) => void;
   pastPatterns: any[];
   setPastPatterns: (patterns: any[]) => void;
+  ragContext: any[];
+  setRagContext: (journals: any[]) => void;
+  isGuest: boolean;
+  setIsGuest: (val: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -22,13 +27,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [suggestion, setSuggestion] = useState('');
   const [chatHistory, setChatHistory] = useState<{ text: string; isAI: boolean }[]>([]);
   const [pastPatterns, setPastPatterns] = useState<any[]>([]);
+  const [ragContext, setRagContext] = useState<any[]>([]);
+  const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
-    const loadPatterns = async () => {
-      const patterns = await fetchUserPatterns(5);
+    const loadMemory = async () => {
+      const patterns = await fetchUserPatterns(10);
+      const journals = await getJournalHistory(20); // Fetch last 20 entries for RAG
       setPastPatterns(patterns);
+      setRagContext(journals);
     };
-    loadPatterns();
+    loadMemory();
   }, []);
 
   return (
@@ -44,6 +53,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setChatHistory,
         pastPatterns,
         setPastPatterns,
+        ragContext,
+        setRagContext,
+        isGuest,
+        setIsGuest,
       }}
     >
       {children}
