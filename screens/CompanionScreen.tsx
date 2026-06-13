@@ -36,7 +36,7 @@ export const CompanionScreen = ({ navigation }: any) => {
 
   const handleImagePick = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       allowsEditing: true,
       base64: true,
       quality: 0.5,

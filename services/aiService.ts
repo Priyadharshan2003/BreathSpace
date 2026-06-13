@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'placeholder_key';
 const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 const SAFETY_PROMPT = `
 You are BreathSpace AI—a highly advanced, empathetic emotional transformation system for Indian students preparing for hyper-competitive exams (JEE, NEET, UPSC, GATE).
