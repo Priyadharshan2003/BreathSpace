@@ -10,11 +10,9 @@ interface JournalInputProps {
 }
 
 const DEFAULT_SUGGESTIONS = [
-  "I'm feeling overwhelmed by my mock tests...",
-  "My chest feels tight when I open my books...",
-  "I couldn't focus at all today...",
-  "I feel like I'm falling behind...",
-  "I'm worried about my parents' expectations..."
+  "Write anything... no pressure.",
+  "What's on your mind?",
+  "Take a deep breath and start typing..."
 ];
 
 export const JournalInput: React.FC<JournalInputProps> = ({ 
@@ -24,6 +22,7 @@ export const JournalInput: React.FC<JournalInputProps> = ({
   suggestions = DEFAULT_SUGGESTIONS
 }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     if (placeholder) return;
@@ -34,14 +33,16 @@ export const JournalInput: React.FC<JournalInputProps> = ({
   }, [placeholder, suggestions.length]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isFocused && styles.containerFocused]}>
       <TextInput
         style={styles.input}
         multiline
-        placeholder={placeholder || `Try: "${suggestions[currentIdx]}"`}
+        placeholder={placeholder || suggestions[currentIdx]}
         placeholderTextColor={theme.colors.light.textSecondary}
         value={value}
         onChangeText={onChangeText}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         autoFocus
       />
     </View>
@@ -53,7 +54,17 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.xl,
-    backgroundColor: theme.colors.light.background,
+    backgroundColor: 'transparent',
+    borderRadius: theme.borderRadius.lg,
+    marginVertical: theme.spacing.sm,
+  },
+  containerFocused: {
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    shadowColor: theme.colors.light.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 15,
+    elevation: 2,
   },
   input: {
     fontSize: theme.typography.sizes.title,

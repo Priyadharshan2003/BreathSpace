@@ -1,86 +1,102 @@
 import { useState, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import * as Speech from 'expo-speech';
-import { generateChatResponse } from '../services/aiService';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+import { generateChatResponse, transcribeAudio } from '../services/aiService';
+import { saveChatMessage, fetchChatHistory } from '../services/supabaseService';
 
-export type LiveState = 'IDLE' | 'LISTENING' | 'THINKING' | 'SPEAKING';
+export type LiveState = 'IDLE' | 'LISTENING' | 'TRANSCRIBING' | 'AWAITING_USER' | 'THINKING' | 'SPEAKING';
 
 export function useLiveConvo(ragContext: any[] = []) {
   const [state, setState] = useState<LiveState>('IDLE');
   const [transcript, setTranscript] = useState('');
   const [aiResponse, setAiResponse] = useState('');
-  
-  const recognitionRef = useRef<any>(null);
-  const transcriptRef = useRef(''); // Reference to avoid closure staleness
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
+  const recordingRef = useRef<Audio.Recording | null>(null);
 
   useEffect(() => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        
-        recognition.onresult = (event: any) => {
-          let currentTranscript = '';
-          for (let i = event.resultIndex; i < event.results.length; ++i) {
-            currentTranscript += event.results[i][0].transcript;
-          }
-          setTranscript(currentTranscript);
-          transcriptRef.current = currentTranscript; // Always keep the latest value in a ref
-        };
-
-        recognition.onend = () => {
-          if (recognitionRef.current && recognitionRef.current._listening) {
-            recognitionRef.current._listening = false;
-            // Pass the absolute latest transcript from the ref to avoid stale state
-            handleSpeechEnd(transcriptRef.current);
-          }
-        };
-        
-        recognitionRef.current = recognition;
-      }
-    }
+    loadHistory();
     return () => {
       Speech.stop();
+      if (recordingRef.current) {
+        recordingRef.current.stopAndUnloadAsync();
+      }
     };
   }, []);
 
-  const startListening = () => {
-    setState('LISTENING');
-    setTranscript('');
-    transcriptRef.current = '';
-    setAiResponse('');
-    Speech.stop();
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current._listening = true;
-        recognitionRef.current.start();
-      } catch (e) { console.error(e); }
+  const loadHistory = async () => {
+    const history = await fetchChatHistory(10);
+    setChatHistory(history);
+  };
+
+  const startListening = async () => {
+    try {
+      Speech.stop();
+      setTranscript('');
+      setAiResponse('');
+      
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status !== 'granted') return;
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      recordingRef.current = recording;
+      setState('LISTENING');
+    } catch (err) {
+      console.error('Failed to start recording', err);
+      setState('IDLE');
     }
   };
 
-  const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current._listening = false;
-      recognitionRef.current.stop();
+  const stopListening = async () => {
+    if (!recordingRef.current) return;
+    setState('TRANSCRIBING');
+    try {
+      await recordingRef.current.stopAndUnloadAsync();
+      const uri = recordingRef.current.getURI();
+      recordingRef.current = null;
+
+      if (uri) {
+        const base64Audio = await FileSystem.readAsStringAsync(uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        
+        // Use Gemini to transcribe
+        const text = await transcribeAudio(base64Audio, "audio/m4a");
+        setTranscript(text);
+        setState('AWAITING_USER');
+      } else {
+        setState('IDLE');
+      }
+    } catch (err) {
+      console.error('Failed to stop recording', err);
+      setState('IDLE');
     }
-    setState('IDLE');
   };
 
-  const handleSpeechEnd = async (finalText: string) => {
+  const submitMessage = async (text: string) => {
+    if (!text || text.trim() === '') {
+      setState('IDLE');
+      return;
+    }
     setState('THINKING');
     
     try {
-      // If the user didn't say anything, don't ping the AI with a blank request
-      if (!finalText || finalText.trim() === "") {
-        setState('IDLE');
-        return;
-      }
-
-      const reply = await generateChatResponse(finalText, "", [], ragContext);
+      await saveChatMessage('user', text);
+      const historyStr = chatHistory.map(m => `${m.role}: ${m.content}`).join("\n");
+      const reply = await generateChatResponse(text, historyStr, [], ragContext);
       
       setAiResponse(reply);
+      await saveChatMessage('ai', reply);
+      loadHistory(); // Refresh history
+      
       setState('SPEAKING');
       
       if (Platform.OS === 'web') {
@@ -98,5 +114,5 @@ export function useLiveConvo(ragContext: any[] = []) {
     }
   };
 
-  return { state, transcript, aiResponse, startListening, stopListening };
+  return { state, transcript, setTranscript, aiResponse, startListening, stopListening, submitMessage, setState };
 }

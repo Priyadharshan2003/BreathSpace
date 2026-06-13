@@ -91,3 +91,21 @@ export async function analyzeImageEntry(base64Image: string, mimeType: string, p
     return "I see what you shared. I'm here with you.";
   }
 }
+
+export async function transcribeAudio(base64Audio: string, mimeType: string = "audio/m4a") {
+  const prompt = `
+    Please transcribe the following audio recording exactly as spoken.
+    Do not add any additional commentary, notes, or formatting. Just the transcription.
+  `;
+  try {
+    const result = await model.generateContent([
+      prompt,
+      { inlineData: { data: base64Audio, mimeType: mimeType } }
+    ]);
+    return result.response.text().trim();
+  } catch (e) {
+    console.error("Audio Transcription Error:", e);
+    return "";
+  }
+}
+

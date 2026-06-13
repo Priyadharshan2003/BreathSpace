@@ -32,3 +32,20 @@ export const fetchUserPatterns = async (limit = 10) => {
   const { data, error } = await supabase.from('patterns').select('emotion, intensity, created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(limit);
   return data || [];
 };
+
+export const saveChatMessage = async (role: 'user' | 'ai', content: string) => {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  // Assumes a 'conversations' table exists with user_id, role, and content
+  const { data, error } = await supabase.from('conversations').insert([{ user_id: user.id, role, content }]).select();
+  if (error) console.log("Save chat error:", error);
+  return data;
+};
+
+export const fetchChatHistory = async (limit = 20) => {
+  const user = await getCurrentUser();
+  if (!user) return [];
+  const { data, error } = await supabase.from('conversations').select('*').eq('user_id', user.id).order('created_at', { ascending: true }).limit(limit);
+  return data || [];
+};
+

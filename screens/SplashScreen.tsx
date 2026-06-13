@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '../styles/theme';
+import { BackgroundGradient } from '../components/BackgroundGradient';
 
 export const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
@@ -38,11 +39,13 @@ export const SplashScreen = ({ onFinish }: { onFinish: () => void }) => {
 
   return (
     <Animated.View style={[styles.container, { opacity: opacityAnim }]}>
-      <SafeAreaView style={styles.center}>
-        <Animated.View style={[styles.circle, { transform: [{ scale: scaleAnim }] }]} />
-        <Text style={styles.splashText}>BreathSpace</Text>
-        <Text style={styles.subText}>Take a breath.</Text>
-      </SafeAreaView>
+      <BackgroundGradient>
+        <SafeAreaView style={styles.center}>
+          <Animated.View style={[styles.circle, { transform: [{ scale: scaleAnim }] }]} />
+          <Text style={styles.splashText}>BreathSpace</Text>
+          <Text style={styles.subText}>Take a breath.</Text>
+        </SafeAreaView>
+      </BackgroundGradient>
     </Animated.View>
   );
 };
@@ -51,7 +54,6 @@ const styles = StyleSheet.create({
   container: { 
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: theme.colors.light.background, 
     zIndex: 999 
   },
   center: { 

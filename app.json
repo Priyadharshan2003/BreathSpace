@@ -33,7 +33,20 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow BreathSpace to access your camera to capture your environment.",
+          "microphonePermission": "Allow BreathSpace to access your microphone for voice journaling."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow BreathSpace to access your microphone for voice journaling."
+        }
+      ]
     ]
   }
 }

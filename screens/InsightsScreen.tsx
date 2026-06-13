@@ -1,19 +1,23 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Lightbulb } from 'lucide-react-native';
 import { theme } from '../styles/theme';
 import { CalmCard } from '../components/CalmCard';
+import { BackgroundGradient } from '../components/BackgroundGradient';
+import { EmptyState } from '../components/EmptyState';
 import { useAppContext } from '../utils/AppContext';
 
 export const InsightsScreen = () => {
   const { insight, suggestion } = useAppContext();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollCenter} showsVerticalScrollIndicator={false}>
-        {!insight ? (
-          <Text style={styles.emptyText}>Write a journal entry to see what I notice...</Text>
-        ) : (
+    <BackgroundGradient>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollCenter} showsVerticalScrollIndicator={false}>
+          {!insight ? (
+            <EmptyState icon={Lightbulb} message="Write a journal entry to see what I notice..." />
+          ) : (
           <>
             <CalmCard title="What I Notice">
               <Text style={styles.bodyText}>{insight}</Text>
@@ -25,14 +29,15 @@ export const InsightsScreen = () => {
             ) : null}
           </>
         )}
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </BackgroundGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.light.background },
-  scrollCenter: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: theme.spacing.lg },
+  container: { flex: 1 },
+  scrollCenter: { flexGrow: 1, justifyContent: 'center', alignItems: 'stretch', padding: theme.spacing.lg },
   bodyText: { fontSize: theme.typography.sizes.body, color: theme.colors.light.text, lineHeight: 26 },
   emptyText: { fontSize: theme.typography.sizes.body, color: theme.colors.light.textSecondary, textAlign: 'center' },
 });

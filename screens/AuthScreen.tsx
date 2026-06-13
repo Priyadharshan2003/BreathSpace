@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { User } from 'lucide-react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { theme } from '../styles/theme';
+import { BackgroundGradient } from '../components/BackgroundGradient';
 import { supabase } from '../utils/supabase';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -37,9 +39,10 @@ export const AuthScreen = ({ onGuestLogin }: { onGuestLogin?: () => void }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Image source={require('../assets/logo.jpg')} style={styles.logo} />
+    <BackgroundGradient>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.content}>
+          <Image source={require('../assets/logo.jpg')} style={styles.logo} />
         
         <Text style={styles.title}>BreathSpace</Text>
         <Text style={styles.subtitle}>Your safe space to reflect.</Text>
@@ -57,17 +60,18 @@ export const AuthScreen = ({ onGuestLogin }: { onGuestLogin?: () => void }) => {
 
         {onGuestLogin && (
           <TouchableOpacity style={[styles.button, styles.guestButton]} onPress={onGuestLogin} disabled={isLoading}>
-            <Ionicons name="person-outline" size={20} color={theme.colors.light.primary} style={styles.icon} />
+            <User size={20} color={theme.colors.light.primary} strokeWidth={1.5} style={styles.icon} />
             <Text style={styles.guestButtonText}>Continue as Guest</Text>
           </TouchableOpacity>
         )}
       </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </BackgroundGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.light.background },
+  container: { flex: 1 },
   content: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: theme.spacing.xl },
   logo: { width: 120, height: 120, borderRadius: 60, marginBottom: theme.spacing.lg },
   title: { fontSize: theme.typography.sizes.largeTitle, color: theme.colors.light.text, fontFamily: theme.typography.fontFamily, marginBottom: theme.spacing.sm, fontWeight: 'bold' },

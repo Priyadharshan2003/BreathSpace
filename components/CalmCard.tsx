@@ -19,14 +19,14 @@ export const CalmCard: React.FC<CalmCardProps> = ({ title, children }) => {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.colors.light.card,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.lg, // now 16px from theme
+    padding: theme.spacing.lg, // 24px padding (>= 12px requested)
     marginVertical: theme.spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2, // For Android
+    shadowColor: theme.colors.light.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3, // For Android
   },
   title: {
     fontSize: theme.typography.sizes.body,

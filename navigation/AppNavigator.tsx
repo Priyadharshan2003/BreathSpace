@@ -1,7 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+import { Leaf, Brain, MessageCircle, User } from 'lucide-react-native';
 import { theme } from '../styles/theme';
 
 import { HomeScreen } from '../screens/HomeScreen';
@@ -19,19 +19,16 @@ const TabNavigator = () => {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ color, size }) => {
-          let iconName: any = 'home-outline';
-
           if (route.name === 'Home') {
-            iconName = 'leaf-outline';
+            return <Leaf size={size} color={color} strokeWidth={1.5} />;
           } else if (route.name === 'Insights') {
-            iconName = 'bulb-outline';
+            return <Brain size={size} color={color} strokeWidth={1.5} />;
           } else if (route.name === 'Companion') {
-            iconName = 'chatbubble-outline';
+            return <MessageCircle size={size} color={color} strokeWidth={1.5} />;
           } else if (route.name === 'Profile') {
-            iconName = 'person-outline';
+            return <User size={size} color={color} strokeWidth={1.5} />;
           }
-
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <Leaf size={size} color={color} strokeWidth={1.5} />;
         },
         tabBarActiveTintColor: theme.colors.light.primary,
         tabBarInactiveTintColor: theme.colors.light.textSecondary,
@@ -68,7 +65,7 @@ const TabNavigator = () => {
 
 export const AppNavigator = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, presentation: 'modal' }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, presentation: 'modal', animation: 'fade' }}>
       <Stack.Screen name="MainTabs" component={TabNavigator} />
       <Stack.Screen name="Live" component={LiveScreen} />
     </Stack.Navigator>

@@ -17,8 +17,10 @@ We went beyond standard GenAI chatbots and implemented 5 deeply psychological fr
 
 ## 🛠 Tech Stack
 - **React Native (Expo)**: Beautiful, smooth, and cross-platform UI.
+- **UI/UX**: Premium Calm Design System using `lucide-react-native` and `expo-linear-gradient` for a soft, emotionally engaging experience.
 - **Supabase**: PostgreSQL database with Row Level Security (RLS) and Google OAuth.
 - **Google Gemini API**: `gemini-1.5-flash` powering the multi-agent transformation system with Long-Context RAG memory.
+- **Expo AV & Camera**: Enables high-quality Voice and Video (Environment Capture) interaction modes for deeply natural conversations.
 
 ## 📦 Local Setup
 1. Clone the repository and run `npm install`.
@@ -59,3 +61,8 @@ The app includes validation and test handling for:
 ## Performance Optimization
 - Duplicate Request Prevention: API limits are respected by disabling buttons (`isLoading` checks) to prevent race conditions.
 - React components avoid unnecessary re-renders.
+
+## Voice and Camera Multimodal Setup
+- **Voice Setup**: Uses `expo-av` to record high-quality audio (`m4a`), converts it to base64, and sends it to the Gemini 1.5 Flash API for accurate Speech-To-Text transcription. The response is synthesized using `expo-speech` for a calm auditory experience.
+- **Camera Usage**: The environment capture mode uses `expo-camera` to safely share visual context. It avoids direct facial analysis to ensure an emotionally safe and non-invasive interaction. 
+- **Permissions**: Safe and strict permission checks are implemented. Video and Audio are never stored on the device or server; they are only temporarily converted to base64 for API transmission.

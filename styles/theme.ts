@@ -1,21 +1,24 @@
 export const theme = {
   colors: {
     light: {
-      background: '#FAFAFA',
+      background: '#F8FAFC',
       card: '#FFFFFF',
-      text: '#4B5563', // Softer dark gray
-      textSecondary: '#9CA3AF',
-      accent: '#D1FAE5', // Calmer light green
-      primary: '#059669', // Deep emerald for high visibility
+      text: '#334155', // Softer, premium dark gray
+      textSecondary: '#94A3B8',
+      accent: '#B8E0F9', // Soft blue as requested (or #A7D7C5 for green)
+      primary: '#0F766E', // Refined teal primary
       border: '#E2E8F0',
+      error: '#FDA4AF', // Soft red
     },
     dark: {
-      background: '#1A202C',
-      card: '#2D3748',
-      text: '#F7FAFC',
-      textSecondary: '#A0AEC0',
-      accent: '#2C7A7B',
-      border: '#4A5568',
+      background: '#0B132B',
+      card: '#1C2541',
+      text: '#F8FAFC',
+      textSecondary: '#94A3B8',
+      accent: '#2C7A7B', // Muted teal
+      primary: '#5EEAD4',
+      border: '#334155',
+      error: '#F87171',
     }
   },
   typography: {
@@ -23,11 +26,11 @@ export const theme = {
     sizes: {
       largeTitle: 34,
       title: 24,
-      body: 18,
+      body: 16, // Adjusted slightly for readability in cards
       small: 14,
     },
     lineHeights: {
-      body: 28, // 1.55x for breathable text
+      body: 26, 
     }
   },
   spacing: {
@@ -40,7 +43,7 @@ export const theme = {
   },
   borderRadius: {
     md: 12,
-    lg: 20,
+    lg: 16, // Soft rounded corners for cards (12-16px requested)
     round: 9999,
   }
 };

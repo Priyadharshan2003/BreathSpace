@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Leaf, LogOut, Radio, Camera, Mic, Wind } from 'lucide-react-native';
 import { theme } from '../styles/theme';
+import { BackgroundGradient } from '../components/BackgroundGradient';
 import { JournalInput } from '../components/JournalInput';
 import { analyzeEmotion, generateInsight, getSuggestion } from '../services/aiService';
 import { saveEmotionalTag } from '../services/supabaseService';
@@ -58,27 +59,31 @@ export const HomeScreen = ({ navigation }: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Ionicons name="leaf" size={40} color={theme.colors.light.primary} accessibilityLabel="BreathSpace Logo" />
-        <TouchableOpacity onPress={logout} style={styles.iconButton} accessibilityRole="button" accessibilityLabel="Log out">
-          <Ionicons name="log-out-outline" size={28} color={theme.colors.light.textSecondary} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.full}>
+    <BackgroundGradient>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Leaf size={40} color={theme.colors.light.primary} strokeWidth={1.5} accessibilityLabel="BreathSpace Logo" />
+          <TouchableOpacity onPress={logout} style={styles.iconButton} accessibilityRole="button" accessibilityLabel="Log out">
+            <LogOut size={28} color={theme.colors.light.textSecondary} strokeWidth={1.5} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.ambientVisual}>
+          <Wind size={60} color={theme.colors.light.primary} strokeWidth={1} style={{ opacity: 0.2 }} />
+        </View>
+
         <Text accessibilityLabel="Journal Input Label" style={styles.srOnly}>How are you feeling today?</Text>
         <JournalInput value={journalText} onChangeText={setJournalText} />
         {error && <Text style={styles.errorText} accessibilityRole="alert">{error}</Text>}
         
         <View style={styles.actionRow}>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Live')} accessibilityRole="button" accessibilityLabel="Start live session">
-            <Ionicons name="radio-outline" size={24} color={theme.colors.light.textSecondary} />
+            <Radio size={24} color={theme.colors.light.textSecondary} strokeWidth={1.5} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Live')} accessibilityRole="button" accessibilityLabel="Open camera">
-            <Ionicons name="camera-outline" size={24} color={theme.colors.light.textSecondary} />
+            <Camera size={24} color={theme.colors.light.textSecondary} strokeWidth={1.5} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Live')} accessibilityRole="button" accessibilityLabel="Open microphone">
-            <Ionicons name="mic-outline" size={24} color={theme.colors.light.textSecondary} />
+            <Mic size={24} color={theme.colors.light.textSecondary} strokeWidth={1.5} />
           </TouchableOpacity>
           <View style={{ flex: 1 }} />
           <TouchableOpacity style={styles.button} onPress={handleJournalSubmit} disabled={isLoading} accessibilityRole="button" accessibilityLabel="Reflect on journal">
@@ -90,13 +95,15 @@ export const HomeScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </BackgroundGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.light.background },
-  header: { padding: theme.spacing.xl, alignItems: 'center' },
+  container: { flex: 1 },
+  header: { padding: theme.spacing.xl, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  ambientVisual: { alignItems: 'center', marginBottom: theme.spacing.lg },
   greetingText: { fontSize: theme.typography.sizes.title, color: theme.colors.light.text, textAlign: 'center', lineHeight: 34 },
   full: { flex: 1, padding: theme.spacing.lg, paddingBottom: 110 },
   actionRow: { flexDirection: 'row', alignItems: 'center', marginTop: theme.spacing.md },

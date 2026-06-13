@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Radio, Camera, Mic, MessageCircleHeart } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { theme } from '../styles/theme';
 import { ChatBubble } from '../components/ChatBubble';
 import { JournalInput } from '../components/JournalInput';
+import { BackgroundGradient } from '../components/BackgroundGradient';
+import { EmptyState } from '../components/EmptyState';
 import { generateChatResponse, analyzeImageEntry } from '../services/aiService';
 import { useAppContext } from '../utils/AppContext';
 
@@ -57,14 +59,15 @@ export const CompanionScreen = ({ navigation }: any) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.greetingText}>Companion</Text>
-      </View>
+    <BackgroundGradient>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.greetingText}>Companion</Text>
+        </View>
       <View style={styles.full}>
         <ScrollView style={styles.chatContainer}>
           {chatHistory.length === 0 ? (
-            <Text style={styles.emptyText}>I'm here when you're ready to talk.</Text>
+            <EmptyState icon={MessageCircleHeart} message="I'm here when you're ready to talk." />
           ) : (
             chatHistory.map((msg, idx) => (
               <ChatBubble key={idx} text={msg.text} isAI={msg.isAI} />
@@ -76,13 +79,13 @@ export const CompanionScreen = ({ navigation }: any) => {
         </View>
         <View style={styles.actionRow}>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Live')} accessibilityRole="button" accessibilityLabel="Start live session">
-            <Ionicons name="radio-outline" size={24} color={theme.colors.light.textSecondary} />
+            <Radio size={24} color={theme.colors.light.textSecondary} strokeWidth={1.5} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} accessibilityRole="button" accessibilityLabel="Open camera" onPress={handleImagePick}>
-            <Ionicons name="camera-outline" size={24} color={theme.colors.light.textSecondary} />
+            <Camera size={24} color={theme.colors.light.textSecondary} strokeWidth={1.5} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Live')} accessibilityRole="button" accessibilityLabel="Voice input">
-            <Ionicons name="mic-outline" size={24} color={theme.colors.light.textSecondary} />
+            <Mic size={24} color={theme.colors.light.textSecondary} strokeWidth={1.5} />
           </TouchableOpacity>
           <View style={{ flex: 1 }} />
           <TouchableOpacity style={styles.button} onPress={handleChatSubmit} disabled={isLoading} accessibilityRole="button" accessibilityLabel="Send message">
@@ -94,12 +97,13 @@ export const CompanionScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </BackgroundGradient>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.light.background },
+  container: { flex: 1 },
   header: { padding: theme.spacing.xl, alignItems: 'center' },
   greetingText: { fontSize: theme.typography.sizes.title, color: theme.colors.light.text, textAlign: 'center', lineHeight: 34 },
   full: { flex: 1, padding: theme.spacing.lg, paddingBottom: 110 },

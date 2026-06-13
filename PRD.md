@@ -23,7 +23,7 @@ We utilize a **Retrieval-Augmented Generation (RAG)** approach without heavy vec
 2. **Entry**: "Take a breath" Lottie animation to reduce cognitive load immediately.
 3. **Journal**: A distraction-free space to dump thoughts or use voice/camera context.
 4. **Insights (RAG-Powered)**: The app generates a 1-sentence profound reflection based on historical data.
-5. **Chat**: A multi-agent conversational interface employing radical empathy.
+5. **Live Conversation (Multimodal)**: A real-time conversational interface with radical empathy. Supports Text, Voice input (transcribed and editable), and Environment Capture (camera) without directly tracking faces. Responses are streamed and spoken using text-to-speech to simulate a natural, emotionally-aware companion. Conversations are securely stored in the database for continuity.
 
 ## 5. Security & Privacy
 - Supabase RLS ensures users can only read/write their own journal entries.
