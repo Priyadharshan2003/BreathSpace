@@ -1,64 +1,72 @@
 import { useState, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
-import * as Speech from 'expo-speech';
 import { generateChatResponse, transcribeAudio } from '../services/aiService';
 import { saveChatMessage, fetchChatHistory } from '../services/supabaseService';
 
-export type LiveState = 'IDLE' | 'LISTENING' | 'TRANSCRIBING' | 'AWAITING_USER' | 'THINKING' | 'SPEAKING';
+// ─────────────────────────────────────────────────────────────────────────────
+// NO expo-av / expo-speech imports here.
+// Both crash Expo Go because they reference ExponentAV native module at
+// bundle time — try/catch does NOT prevent Metro from loading them.
+//
+// This hook uses:
+//   • Web Speech API (SpeechRecognition) for voice input  → works in Expo Go
+//   • window.speechSynthesis for TTS output               → works in Expo Go
+// When you switch to a proper Dev Build, replace these with expo-av + expo-speech.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ------------------------------------------------------------------
-// Lazy-load expo-av so the app doesn't crash when native modules are
-// unavailable (i.e., running inside Expo Go without a dev build).
-// ------------------------------------------------------------------
-let AudioModule: any = null;
-let FileSystemModule: any = null;
+export type LiveState =
+  | 'IDLE'
+  | 'LISTENING'
+  | 'TRANSCRIBING'
+  | 'AWAITING_USER'
+  | 'THINKING'
+  | 'SPEAKING';
 
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  AudioModule = require('expo-av').Audio;
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  FileSystemModule = require('expo-file-system');
-} catch (_) {
-  console.warn('[useLiveConvo] expo-av / expo-file-system not available (Expo Go). Voice recording disabled.');
-}
+// ─── Web Speech helpers ───────────────────────────────────────────────────────
 
-// ------------------------------------------------------------------
-// Web Speech Recognition shim (works in Expo Go on Android/iOS via
-// the embedded JS engine's Web APIs, and in Expo Web natively).
-// ------------------------------------------------------------------
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
-
-function getWebSpeechRecognition(): any | null {
+function getSpeechRecognition(): any | null {
+  if (Platform.OS !== 'web') return null; // only works in web/Expo Go web
   if (typeof window === 'undefined') return null;
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SR =
+    (window as any).SpeechRecognition ||
+    (window as any).webkitSpeechRecognition;
   if (!SR) return null;
   return new SR();
 }
+
+function stopSpeaking() {
+  if (typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+function speakText(text: string, onDone: () => void) {
+  if (typeof window !== 'undefined' && window.speechSynthesis) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.onend = onDone;
+    u.onerror = onDone;
+    window.speechSynthesis.speak(u);
+  } else {
+    // No TTS available — just mark done immediately
+    onDone();
+  }
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useLiveConvo(ragContext: any[] = []) {
   const [state, setState] = useState<LiveState>('IDLE');
   const [transcript, setTranscript] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [chatHistory, setChatHistory] = useState<any[]>([]);
-  const recordingRef = useRef<any>(null);
   const recognitionRef = useRef<any>(null);
-
-  const nativeAudioAvailable = !!AudioModule;
 
   useEffect(() => {
     loadHistory();
     return () => {
-      Speech.stop();
-      if (recordingRef.current) {
-        try { recordingRef.current.stopAndUnloadAsync(); } catch (_) {}
-      }
+      stopSpeaking();
       if (recognitionRef.current) {
-        try { recognitionRef.current.stop(); } catch (_) {}
+        try { recognitionRef.current.abort(); } catch (_) {}
       }
     };
   }, []);
@@ -70,51 +78,17 @@ export function useLiveConvo(ragContext: any[] = []) {
     } catch (_) {}
   };
 
-  // ----------------------------------------------------------------
-  // NATIVE path: expo-av recording (Dev Build / bare workflow)
-  // ----------------------------------------------------------------
-  const startNativeRecording = async () => {
-    const permission = await AudioModule.requestPermissionsAsync();
-    if (permission.status !== 'granted') return;
+  // ─── Voice input via Web Speech API ────────────────────────────────────────
 
-    await AudioModule.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-    });
+  const startListening = () => {
+    stopSpeaking();
+    setTranscript('');
+    setAiResponse('');
 
-    const { recording } = await AudioModule.Recording.createAsync(
-      AudioModule.RecordingOptionsPresets.HIGH_QUALITY
-    );
-    recordingRef.current = recording;
-    setState('LISTENING');
-  };
-
-  const stopNativeRecording = async () => {
-    if (!recordingRef.current) return;
-    setState('TRANSCRIBING');
-    await recordingRef.current.stopAndUnloadAsync();
-    const uri = recordingRef.current.getURI();
-    recordingRef.current = null;
-
-    if (uri && FileSystemModule) {
-      const base64Audio = await FileSystemModule.readAsStringAsync(uri, {
-        encoding: FileSystemModule.EncodingType.Base64,
-      });
-      const text = await transcribeAudio(base64Audio, 'audio/m4a');
-      setTranscript(text);
-      setState('AWAITING_USER');
-    } else {
-      setState('IDLE');
-    }
-  };
-
-  // ----------------------------------------------------------------
-  // WEB / EXPO GO path: Web Speech API (no native module required)
-  // ----------------------------------------------------------------
-  const startWebSpeech = () => {
-    const recognition = getWebSpeechRecognition();
+    const recognition = getSpeechRecognition();
     if (!recognition) {
-      // Absolute fallback: just open text mode
+      // SpeechRecognition not available (native Expo Go on device) →
+      // fall straight to text input mode so the user can type.
       setState('AWAITING_USER');
       return;
     }
@@ -125,59 +99,31 @@ export function useLiveConvo(ragContext: any[] = []) {
     recognition.lang = 'en-US';
 
     recognition.onstart = () => setState('LISTENING');
+
     recognition.onresult = (event: any) => {
-      const text = event.results[0][0].transcript;
+      const text: string = event.results[0][0].transcript;
       setTranscript(text);
       setState('AWAITING_USER');
     };
+
     recognition.onerror = () => setState('AWAITING_USER');
     recognition.onend = () => {
-      if (state === 'LISTENING') setState('AWAITING_USER');
+      // If still listening when it ends unexpectedly, open text mode
+      setState((prev) => (prev === 'LISTENING' ? 'AWAITING_USER' : prev));
     };
 
     recognition.start();
   };
 
-  const stopWebSpeech = () => {
+  const stopListening = () => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
+      try { recognitionRef.current.stop(); } catch (_) {}
       recognitionRef.current = null;
     }
     setState('AWAITING_USER');
   };
 
-  // ----------------------------------------------------------------
-  // Public API — picks the right path automatically
-  // ----------------------------------------------------------------
-  const startListening = async () => {
-    try {
-      Speech.stop();
-      setTranscript('');
-      setAiResponse('');
-
-      if (nativeAudioAvailable && Platform.OS !== 'web') {
-        await startNativeRecording();
-      } else {
-        startWebSpeech();
-      }
-    } catch (err) {
-      console.error('Failed to start recording', err);
-      setState('IDLE');
-    }
-  };
-
-  const stopListening = async () => {
-    try {
-      if (nativeAudioAvailable && Platform.OS !== 'web') {
-        await stopNativeRecording();
-      } else {
-        stopWebSpeech();
-      }
-    } catch (err) {
-      console.error('Failed to stop recording', err);
-      setState('IDLE');
-    }
-  };
+  // ─── Submit message → Gemini ────────────────────────────────────────────────
 
   const submitMessage = async (text: string) => {
     if (!text || text.trim() === '') {
@@ -188,9 +134,11 @@ export function useLiveConvo(ragContext: any[] = []) {
 
     try {
       await saveChatMessage('user', text);
+
       const historyStr = chatHistory
         .map((m) => `${m.role}: ${m.content}`)
         .join('\n');
+
       const reply = await generateChatResponse(text, historyStr, [], ragContext);
 
       setAiResponse(reply);
@@ -198,16 +146,9 @@ export function useLiveConvo(ragContext: any[] = []) {
       loadHistory();
 
       setState('SPEAKING');
-
-      if (Platform.OS === 'web') {
-        const utterance = new SpeechSynthesisUtterance(reply);
-        utterance.onend = () => setState('IDLE');
-        window.speechSynthesis.speak(utterance);
-      } else {
-        Speech.speak(reply, { onDone: () => setState('IDLE') });
-      }
+      speakText(reply, () => setState('IDLE'));
     } catch (e) {
-      console.error('Speech Generation Error:', e);
+      console.error('generateChatResponse error:', e);
       setState('IDLE');
     }
   };
@@ -221,6 +162,5 @@ export function useLiveConvo(ragContext: any[] = []) {
     stopListening,
     submitMessage,
     setState,
-    nativeAudioAvailable,
   };
 }

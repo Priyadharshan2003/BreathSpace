@@ -14,29 +14,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../styles/theme';
 import { useLiveConvo } from '../hooks/useLiveConvo';
 
-// -------------------------------------------------------------------
-// Lazy-load expo-camera — not available in Expo Go, only in dev builds
-// -------------------------------------------------------------------
-let CameraView: any = null;
-let useCameraPermissions: any = null;
-try {
-  const cam = require('expo-camera');
-  CameraView = cam.CameraView;
-  useCameraPermissions = cam.useCameraPermissions;
-} catch (_) {
-  console.warn('[LiveScreen] expo-camera not available (Expo Go). Camera mode disabled.');
-}
-
-// -------------------------------------------------------------------
-// Stub hook so the component always has a valid permissions pair
-// -------------------------------------------------------------------
-function useCameraPermissionsSafe(): [any, () => Promise<any>] {
-  if (useCameraPermissions) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useCameraPermissions();
-  }
-  return [null, async () => ({ granted: false })];
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// expo-camera is NOT imported here.
+// It requires a native Dev Build and crashes Expo Go at bundle time.
+// Camera UI is hidden until a Dev Build is used. See DEVBUILD.md.
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const LiveScreen = ({ navigation }: any) => {
   const {
@@ -49,161 +31,158 @@ export const LiveScreen = ({ navigation }: any) => {
     submitMessage,
   } = useLiveConvo();
 
-  const [isVideoEnabled, setIsVideoEnabled] = useState(false);
   const [inputMode, setInputMode] = useState<'voice' | 'text'>('voice');
-  const [permission, requestPermission] = useCameraPermissionsSafe();
-
-  const cameraAvailable = !!CameraView;
-
-  const toggleVideo = async () => {
-    if (!cameraAvailable) return;
-    if (!permission?.granted) {
-      const res = await requestPermission();
-      if (!res.granted) return;
-    }
-    setIsVideoEnabled((v) => !v);
-  };
 
   const getOrbColor = () => {
     switch (state) {
-      case 'LISTENING':     return '#3B82F6';
-      case 'TRANSCRIBING':  return '#F59E0B';
-      case 'THINKING':      return '#8B5CF6';
-      case 'SPEAKING':      return '#10B981';
-      default:              return theme.colors.dark.border;
+      case 'LISTENING':    return '#3B82F6';
+      case 'TRANSCRIBING': return '#F59E0B';
+      case 'THINKING':     return '#8B5CF6';
+      case 'SPEAKING':     return '#10B981';
+      default:             return theme.colors.dark.border;
     }
   };
 
   const getStatusText = () => {
     switch (state) {
-      case 'IDLE':           return 'Ready to listen';
-      case 'LISTENING':      return 'Listening...';
-      case 'TRANSCRIBING':   return 'Understanding...';
-      case 'AWAITING_USER':  return 'Edit or Send';
-      case 'THINKING':       return 'Thinking...';
-      case 'SPEAKING':       return 'Speaking...';
-      default:               return '';
+      case 'IDLE':          return 'Tap mic to begin';
+      case 'LISTENING':     return 'Listening...';
+      case 'TRANSCRIBING':  return 'Understanding...';
+      case 'AWAITING_USER': return 'Edit or Send';
+      case 'THINKING':      return 'Thinking...';
+      case 'SPEAKING':      return 'Speaking...';
+      default:              return '';
     }
   };
 
+  const handleMicPress = () => {
+    if (state === 'IDLE' || state === 'AWAITING_USER') {
+      startListening();
+    } else if (state === 'LISTENING') {
+      stopListening();
+    }
+  };
+
+  const handleSend = () => {
+    const text = transcript.trim();
+    if (!text) return;
+    submitMessage(text);
+    setTranscript('');
+  };
+
+  const showTextInput =
+    inputMode === 'text' || state === 'AWAITING_USER';
+
+  const isBusy =
+    state === 'TRANSCRIBING' || state === 'THINKING' || state === 'SPEAKING';
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Camera preview — only rendered when native module is available */}
-      {isVideoEnabled && cameraAvailable && permission?.granted && (
-        <View style={StyleSheet.absoluteFill}>
-          <CameraView style={StyleSheet.absoluteFill} facing="front" />
-          <View style={styles.cameraOverlay} />
-        </View>
-      )}
-
+      {/* ── Header ── */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           accessibilityRole="button"
-          accessibilityLabel="Close"
+          accessibilityLabel="Close live session"
         >
           <Ionicons name="close" size={32} color="#FFF" />
         </TouchableOpacity>
-        {cameraAvailable && (
-          <TouchableOpacity onPress={toggleVideo} accessibilityRole="button" accessibilityLabel="Toggle camera">
-            <Ionicons
-              name={isVideoEnabled ? 'videocam' : 'videocam-off'}
-              size={28}
-              color="#FFF"
-            />
-          </TouchableOpacity>
-        )}
       </View>
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}
       >
-        {/* Orb */}
+        {/* ── Orb status indicator ── */}
         <View style={styles.orbContainer}>
           <View style={[styles.orb, { backgroundColor: getOrbColor() }]} />
           <Text style={styles.statusText} accessibilityRole="text">
             {getStatusText()}
           </Text>
+          {Platform.OS !== 'web' && state === 'IDLE' && (
+            <Text style={styles.hintText}>
+              Voice recognition available on Web{'\n'}Use "Write instead" on mobile
+            </Text>
+          )}
         </View>
 
-        {/* AI response */}
+        {/* ── AI response ── */}
         <ScrollView
           style={styles.transcriptContainer}
-          contentContainerStyle={{ justifyContent: 'flex-end', flexGrow: 1 }}
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end' }}
         >
           {aiResponse ? (
             <Text style={styles.transcriptAi}>{aiResponse}</Text>
           ) : null}
         </ScrollView>
 
+        {/* ── Input area ── */}
         <View style={styles.inputArea}>
-          {/* Text input — shown in text mode or when awaiting user edit */}
-          {(state === 'AWAITING_USER' || inputMode === 'text') && (
+          {showTextInput && (
             <View style={styles.textInputContainer}>
               <TextInput
                 style={styles.textInput}
                 value={transcript}
                 onChangeText={setTranscript}
-                placeholder="Type or edit your message..."
+                placeholder="Type your message..."
                 placeholderTextColor="#6B7280"
                 multiline
+                accessibilityLabel="Message input"
               />
               <TouchableOpacity
                 style={styles.sendButton}
+                onPress={handleSend}
                 accessibilityRole="button"
-                accessibilityLabel="Send message"
-                onPress={() => {
-                  submitMessage(transcript);
-                  setTranscript('');
-                }}
+                accessibilityLabel="Send"
               >
-                <Ionicons name="send" size={24} color="#FFF" />
+                <Ionicons name="send" size={22} color="#FFF" />
               </TouchableOpacity>
             </View>
           )}
 
-          {/* Mic / Stop / Busy button */}
+          {/* ── Mic / Stop / Busy button ── */}
           <View style={styles.controls}>
-            {state === 'IDLE' || state === 'AWAITING_USER' ? (
+            {isBusy ? (
+              <View style={[styles.mainButton, { backgroundColor: '#374151' }]}>
+                <Ionicons name="ellipsis-horizontal" size={32} color="#9CA3AF" />
+              </View>
+            ) : state === 'LISTENING' ? (
+              <TouchableOpacity
+                style={[styles.mainButton, { backgroundColor: '#EF4444' }]}
+                onPress={handleMicPress}
+                accessibilityRole="button"
+                accessibilityLabel="Stop listening"
+              >
+                <Ionicons name="stop-circle" size={36} color="#FFF" />
+              </TouchableOpacity>
+            ) : (
               <TouchableOpacity
                 style={[styles.mainButton, { backgroundColor: '#3B82F6' }]}
-                onPress={startListening}
+                onPress={handleMicPress}
                 accessibilityRole="button"
                 accessibilityLabel="Start listening"
               >
                 <Ionicons name="mic" size={32} color="#FFF" />
               </TouchableOpacity>
-            ) : state === 'LISTENING' ? (
-              <TouchableOpacity
-                style={[styles.mainButton, { backgroundColor: '#EF4444' }]}
-                onPress={stopListening}
-                accessibilityRole="button"
-                accessibilityLabel="Stop listening"
-              >
-                <Ionicons name="stop" size={32} color="#FFF" />
-              </TouchableOpacity>
-            ) : (
-              <View style={[styles.mainButton, { backgroundColor: '#374151' }]}>
-                <Ionicons name="ellipsis-horizontal" size={32} color="#FFF" />
-              </View>
             )}
           </View>
 
-          {/* Mode switches */}
+          {/* ── Mode switches ── */}
           <View style={styles.modeSwitches}>
             {inputMode === 'voice' ? (
-              <TouchableOpacity onPress={() => setInputMode('text')}>
-                <Text style={styles.modeSwitchText}>Write instead</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setInputMode('text');
+                  if (state === 'IDLE') {
+                    // open input immediately
+                  }
+                }}
+              >
+                <Text style={styles.modeSwitchText}>✏️  Write instead</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={() => setInputMode('voice')}>
-                <Text style={styles.modeSwitchText}>Talk instead</Text>
-              </TouchableOpacity>
-            )}
-            {cameraAvailable && !isVideoEnabled && (
-              <TouchableOpacity onPress={toggleVideo}>
-                <Text style={styles.modeSwitchText}>Capture instead</Text>
+                <Text style={styles.modeSwitchText}>🎤  Talk instead</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -214,10 +193,9 @@ export const LiveScreen = ({ navigation }: any) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  cameraOverlay: {
-    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+  container: {
+    flex: 1,
+    backgroundColor: '#0A0A0F',
   },
   header: {
     flexDirection: 'row',
@@ -226,43 +204,91 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   content: { flex: 1 },
-  orbContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  orbContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
   orb: {
-    width: 120, height: 120, borderRadius: 60,
-    shadowColor: '#FFF', shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5, shadowRadius: 40,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    shadowColor: '#FFF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 30,
+    elevation: 20,
   },
   statusText: {
-    color: '#FFF', marginTop: 24, fontSize: 16,
-    fontWeight: '500', letterSpacing: 1,
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '500',
+    letterSpacing: 1,
+  },
+  hintText: {
+    color: '#6B7280',
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginTop: 4,
   },
   transcriptContainer: {
-    paddingHorizontal: 24, paddingBottom: 12, maxHeight: 160,
+    paddingHorizontal: 24,
+    paddingBottom: 12,
+    maxHeight: 160,
   },
   transcriptAi: {
-    color: '#FFF', fontSize: 20, fontWeight: '500',
-    lineHeight: 30, textAlign: 'center',
+    color: '#F9FAFB',
+    fontSize: 18,
+    fontWeight: '400',
+    lineHeight: 28,
+    textAlign: 'center',
   },
-  inputArea: { padding: 24, paddingBottom: 40 },
+  inputArea: {
+    padding: 24,
+    paddingBottom: 48,
+    gap: 20,
+  },
   textInputContainer: {
-    flexDirection: 'row', alignItems: 'flex-end',
-    backgroundColor: '#1F2937', borderRadius: 20,
-    padding: 12, marginBottom: 24,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    backgroundColor: '#1F2937',
+    borderRadius: 20,
+    padding: 12,
+    gap: 12,
   },
   textInput: {
-    flex: 1, color: '#FFF', fontSize: 16,
-    minHeight: 40, maxHeight: 120,
+    flex: 1,
+    color: '#FFF',
+    fontSize: 16,
+    minHeight: 40,
+    maxHeight: 120,
   },
   sendButton: {
-    marginLeft: 12, backgroundColor: '#10B981',
-    padding: 10, borderRadius: 20,
-    justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#10B981',
+    padding: 10,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  controls: { alignItems: 'center', marginBottom: 24 },
+  controls: {
+    alignItems: 'center',
+  },
   mainButton: {
-    width: 72, height: 72, borderRadius: 36,
-    justifyContent: 'center', alignItems: 'center',
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  modeSwitches: { flexDirection: 'row', justifyContent: 'center', gap: 24 },
-  modeSwitchText: { color: '#9CA3AF', fontSize: 14, fontWeight: '500' },
+  modeSwitches: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  modeSwitchText: {
+    color: '#9CA3AF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
 });
