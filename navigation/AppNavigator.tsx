@@ -1,5 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../styles/theme';
 
@@ -7,10 +8,12 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { InsightsScreen } from '../screens/InsightsScreen';
 import { CompanionScreen } from '../screens/CompanionScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { LiveScreen } from '../screens/LiveScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-export const AppNavigator = () => {
+const TabNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -60,5 +63,14 @@ export const AppNavigator = () => {
       <Tab.Screen name="Companion" component={CompanionScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
+  );
+};
+
+export const AppNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false, presentation: 'modal' }}>
+      <Stack.Screen name="MainTabs" component={TabNavigator} />
+      <Stack.Screen name="Live" component={LiveScreen} />
+    </Stack.Navigator>
   );
 };

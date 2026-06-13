@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,7 +9,7 @@ import { JournalInput } from '../components/JournalInput';
 import { generateChatResponse, analyzeImageEntry } from '../services/aiService';
 import { useAppContext } from '../utils/AppContext';
 
-export const CompanionScreen = () => {
+export const CompanionScreen = ({ navigation }: any) => {
   const { chatHistory, setChatHistory, pastPatterns, ragContext } = useAppContext();
   const [chatInput, setChatInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +58,9 @@ export const CompanionScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.greetingText}>Companion</Text>
+      </View>
       <View style={styles.full}>
         <ScrollView style={styles.chatContainer}>
           {chatHistory.length === 0 ? (
@@ -72,14 +75,17 @@ export const CompanionScreen = () => {
           <JournalInput value={chatInput} onChangeText={setChatInput} placeholder="Type softly..." />
         </View>
         <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.iconButton} onPress={handleImagePick}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Live')} accessibilityRole="button" accessibilityLabel="Start live session">
+            <Ionicons name="radio-outline" size={24} color={theme.colors.light.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} accessibilityRole="button" accessibilityLabel="Open camera" onPress={handleImagePick}>
             <Ionicons name="camera-outline" size={24} color={theme.colors.light.textSecondary} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Live')} accessibilityRole="button" accessibilityLabel="Voice input">
             <Ionicons name="mic-outline" size={24} color={theme.colors.light.textSecondary} />
           </TouchableOpacity>
           <View style={{ flex: 1 }} />
-          <TouchableOpacity style={styles.button} onPress={handleChatSubmit} disabled={isLoading}>
+          <TouchableOpacity style={styles.button} onPress={handleChatSubmit} disabled={isLoading} accessibilityRole="button" accessibilityLabel="Send message">
             {isLoading ? (
                <ActivityIndicator size="small" color={theme.colors.light.card} />
             ) : (
@@ -94,6 +100,8 @@ export const CompanionScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.light.background },
+  header: { padding: theme.spacing.xl, alignItems: 'center' },
+  greetingText: { fontSize: theme.typography.sizes.title, color: theme.colors.light.text, textAlign: 'center', lineHeight: 34 },
   full: { flex: 1, padding: theme.spacing.lg, paddingBottom: 110 },
   chatContainer: { flex: 1, marginBottom: theme.spacing.md },
   inputRow: { height: 100 },
